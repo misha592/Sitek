@@ -17,8 +17,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
             position: relative;
         }
 
@@ -35,7 +35,7 @@
             transition: transform 0.5s ease;
         }
 
-        /* Оверлей, цвет которого тоже будет меняться кодом */
+        /* Оверлей */
         .background-overlay {
             position: absolute;
             top: 0;
@@ -49,20 +49,17 @@
         /* Основная карточка */
         .bio-card {
             position: relative;
-            padding: 40px 30px;
+            padding: 35px 25px;
             border-radius: 16px;
             text-align: center;
             backdrop-filter: blur(14px);
-            width: 310px;
+            width: 320px;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            margin: 20px 0;
         }
         
         body:hover .background-image {
             transform: scale(1.02);
-        }
-
-        .bio-card:hover {
-            transform: translateY(-4px);
         }
 
         .avatar-container {
@@ -104,7 +101,7 @@
             color: #ffffff;
         }
 
-        /* Текст статуса (меняется скриптом) */
+        /* Текст статуса */
         .status-caption {
             display: inline-block;
             font-size: 0.85rem;
@@ -118,7 +115,7 @@
         .tag {
             font-weight: 400;
             font-size: 0.8rem;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             display: block;
             letter-spacing: 0.5px;
             transition: color 0.5s ease;
@@ -133,12 +130,84 @@
             gap: 4px;
             align-items: center;
             justify-content: center;
+            margin-bottom: 20px;
             transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
         }
 
         .activity-text {
             font-size: 0.75rem;
             transition: color 0.5s ease;
+        }
+
+        /* Кнопка ссылки на Дискорд */
+        .discord-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 11px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .discord-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* Разделитель */
+        .separator {
+            height: 1px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Блок формы вебхука */
+        .msg-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .msg-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #ffffff;
+            font-size: 0.8rem;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .msg-send-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .msg-send-btn:hover {
+            transform: scale(1.01);
+        }
+
+        .msg-status {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
         }
     </style>
 </head>
@@ -161,10 +230,25 @@
             <span id="status-text">Получение статуса...</span>
             <span id="activity-text" class="activity-text"></span>
         </div>
+
+        <a id="discord-link" href="https://discord.gg/qgs4ASzPtP" target="_blank" class="discord-btn">
+            Зайти в Discord
+        </a>
+
+        <div class="separator"></div>
+
+        <div class="msg-form">
+            <textarea id="msg-input" class="msg-input" rows="2" placeholder="Напиши мне что-нибудь анонимно..."></textarea>
+            <button id="msg-btn" class="msg-send-btn">Отправить анонимку</button>
+            <div id="msg-status" class="msg-status"></div>
+        </div>
     </div>
 
     <script>
         const DISCORD_ID = "1447973979171323946"; 
+        
+        // Твой вебхук успешно подключен
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1507493020017103031/h5vcdsPG6Zz5fdHJGwQpiqLPknlCDf1uBc_qW1MrOsrNbvOmxIT_cAuWDZ-pdfS231EP"; 
 
         // НАСТРОЙКИ ДЛЯ КАЖДОЙ ТЕМЫ
         const themes = [
@@ -185,7 +269,14 @@
                     boxBg: "rgba(10, 7, 5, 0.5)",
                     boxBorder: "1px solid rgba(220, 150, 80, 0.06)",
                     boxColor: "#f3e8de",
-                    activityColor: "#a89485"
+                    activityColor: "#a89485",
+                    btnBg: "rgba(220, 150, 80, 0.1)",
+                    btnBorder: "1px solid rgba(220, 150, 80, 0.25)",
+                    btnColor: "#dd9c5a",
+                    btnShadow: "0 0 15px rgba(220, 150, 80, 0.1)",
+                    inputFocus: "rgba(220, 150, 80, 0.4)",
+                    submitBg: "#dd9c5a",
+                    submitColor: "#120e0a"
                 }
             },
             {
@@ -205,19 +296,23 @@
                     boxBg: "rgba(10, 4, 4, 0.6)",
                     boxBorder: "1px solid rgba(239, 68, 68, 0.08)",
                     boxColor: "#fca5a5",
-                    activityColor: "#f87171"
+                    activityColor: "#f87171",
+                    btnBg: "rgba(239, 68, 68, 0.08)",
+                    btnBorder: "1px solid rgba(239, 68, 68, 0.25)",
+                    btnColor: "#ef4444",
+                    btnShadow: "0 0 15px rgba(239, 68, 68, 0.1)",
+                    inputFocus: "rgba(239, 68, 68, 0.4)",
+                    submitBg: "#ef4444",
+                    submitColor: "#ffffff"
                 }
             }
         ];
 
-        // Применяем рандомную тему при загрузке
         const currentTheme = themes[Math.floor(Math.random() * themes.length)];
         
-        // Применяем картинку и текст
         document.getElementById('bg').style.backgroundImage = `url('${currentTheme.bgImage}')`;
         document.getElementById('caption').innerText = currentTheme.captionText;
         
-        // Применяем все стили выбранной темы
         const s = currentTheme.styles;
         document.getElementById('overlay').style.background = s.overlay;
         
@@ -227,7 +322,7 @@
         card.style.boxShadow = s.cardShadow;
         
         document.getElementById('discord-avatar').style.border = s.avatarBorder;
-        document.getElementById('status-dot').style.borderColor = s.dotBorder.split(' ')[2]; // берем только цвет
+        document.getElementById('status-dot').style.borderColor = s.dotBorder.split(' ')[2];
         
         const cap = document.getElementById('caption');
         cap.style.color = s.captionColor;
@@ -242,16 +337,33 @@
         
         document.getElementById('activity-text').style.color = s.activityColor;
 
-        // Эффект наведения (hover) на саму карту с учетом темы
+        const btn = document.getElementById('discord-link');
+        btn.style.background = s.btnBg;
+        btn.style.border = s.btnBorder;
+        btn.style.color = s.btnColor;
+        btn.style.boxShadow = s.btnShadow;
+
+        const submitBtn = document.getElementById('msg-btn');
+        submitBtn.style.background = s.submitBg;
+        submitBtn.style.color = s.submitColor;
+
+        const inputField = document.getElementById('msg-input');
+        inputField.addEventListener('focus', () => inputField.style.borderColor = s.inputFocus);
+        inputField.addEventListener('blur', () => inputField.style.borderColor = 'rgba(255, 255, 255, 0.1)');
+
+        btn.addEventListener('mouseenter', () => {
+            btn.style.background = currentTheme.captionText.includes("КРОВЬ") ? 'rgba(239, 68, 68, 0.2)' : 'rgba(220, 150, 80, 0.2)';
+            btn.style.boxShadow = currentTheme.captionText.includes("КРОВЬ") ? '0 0 20px rgba(239, 68, 68, 0.4)' : '0 0 20px rgba(220, 150, 80, 0.4)';
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.background = s.btnBg;
+            btn.style.boxShadow = s.btnShadow;
+        });
+
         card.addEventListener('mouseenter', () => {
             card.style.transform = 'translateY(-4px)';
-            if (currentTheme.captionText.includes("КРОВЬ")) {
-                card.style.borderColor = 'rgba(239, 68, 68, 0.35)';
-                card.style.background = 'rgba(16, 6, 6, 0.8)';
-            } else {
-                card.style.borderColor = 'rgba(220, 150, 80, 0.3)';
-                card.style.background = 'rgba(22, 16, 12, 0.75)';
-            }
+            card.style.borderColor = currentTheme.captionText.includes("КРОВЬ") ? 'rgba(239, 68, 68, 0.35)' : 'rgba(220, 150, 80, 0.3)';
+            card.style.background = currentTheme.captionText.includes("КРОВЬ") ? 'rgba(16, 6, 6, 0.8)' : 'rgba(22, 16, 12, 0.75)';
         });
         card.addEventListener('mouseleave', () => {
             card.style.transform = 'translateY(0)';
@@ -259,8 +371,54 @@
             card.style.background = s.cardBg;
         });
 
+        // --- ЛОГИКА ОТПРАВКИ ВЕБХУКА ---
+        submitBtn.addEventListener('click', async () => {
+            const text = inputField.value.trim();
+            const statusEl = document.getElementById('msg-status');
+            
+            if(!text) {
+                statusEl.innerText = "Сначала напиши что-нибудь!";
+                statusEl.style.color = "#ff4444";
+                statusEl.style.display = "block";
+                return;
+            }
 
-        // Анимация названия вкладки браузера
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Отправка...";
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: "📩 Новое анонимное сообщение с сайта!",
+                            description: `**Текст:** ${text}`,
+                            color: currentTheme.captionText.includes("КРОВЬ") ? 15672356 : 14456376, 
+                            timestamp: new Date()
+                        }]
+                    })
+                });
+
+                if(response.ok) {
+                    statusEl.innerText = "Успешно отправлено!";
+                    statusEl.style.color = "#23a55a";
+                    statusEl.style.display = "block";
+                    inputField.value = ""; 
+                } else {
+                    throw new Error();
+                }
+            } catch (e) {
+                statusEl.innerText = "Ошибка при отправке.";
+                statusEl.style.color = "#ff4444";
+                statusEl.style.display = "block";
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Отправить анонимку";
+            }
+        });
+
+        // Анимация названия вкладки
         const titles = [">-<", "•_•", "~_~", "^_-", "x_x", "о_о"];
         let titleIndex = 0;
         setInterval(() => {
@@ -276,7 +434,6 @@
                 
                 if (data.success) {
                     const user = data.data;
-                    
                     document.getElementById('username').innerText = user.discord_user.global_name || user.discord_user.username;
                     document.getElementById('discord-tag').innerText = `@${user.discord_user.username}`;
                     
@@ -306,20 +463,4 @@
 
                         if (customStatus && customStatus.state) {
                             activityText.innerText = customStatus.state;
-                        } else if (gameStatus) {
-                            activityText.innerText = `В игре: ${gameStatus.name}`;
-                        } else if (spotify) {
-                            activityText.innerText = `Слушает: ${spotify.song}`;
                         }
-                    }
-                }
-            } catch (error) {
-                console.error("Ошибка API:", error);
-            }
-        }
-
-        fetchDiscordStatus();
-        setInterval(fetchDiscordStatus, 5000);
-    </script>
-</body>
-</html>
