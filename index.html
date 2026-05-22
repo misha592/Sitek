@@ -3,39 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bio</title>
+    <title>>-<</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #09090b;
+            background: #070709;
             color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
+        
+        /* Задний фон с легким неоновым свечением */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(88, 101, 242, 0.15);
+            filter: blur(120px);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
         .bio-card {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 35px 25px;
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 40px 30px;
             border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             text-align: center;
             backdrop-filter: blur(20px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
             width: 300px;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, border-color 0.3s ease;
         }
+        
         .bio-card:hover {
             transform: translateY(-5px);
+            border-color: rgba(88, 101, 242, 0.2);
         }
+
         .avatar-container {
             position: relative;
             width: 110px;
             height: 110px;
             margin: 0 auto 20px;
         }
+
         .avatar {
             width: 100%;
             height: 100%;
@@ -44,6 +67,7 @@
             background: #1e1f22;
             border: 2px solid rgba(255, 255, 255, 0.1);
         }
+
         /* Индикатор статуса */
         .status-dot {
             position: absolute;
@@ -52,45 +76,62 @@
             width: 22px;
             height: 22px;
             border-radius: 50%;
-            border: 4px solid #09090b;
+            border: 4px solid #070709;
             background-color: #747f8d;
             transition: background-color 0.3s ease;
         }
-        /* Цвета статусов */
+
+        /* Цвета статусов Дискорда */
         .status-online { background-color: #23a55a; }
         .status-idle { background-color: #f0b232; }
         .status-dnd { background-color: #f23f43; }
         .status-offline { background-color: #747f8d; }
 
         h1 {
-            font-size: 1.6rem;
+            font-size: 1.7rem;
             margin: 10px 0 5px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
-        .tag {
-            color: #5865F2;
+
+        /* Стильная неоновая надпись I am vibecoder */
+        .status-caption {
+            display: inline-block;
+            font-size: 1.05rem;
             font-weight: 600;
-            font-size: 0.95rem;
+            background: linear-gradient(45deg, #8a2be2, #5865F2, #00c6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .tag {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 500;
+            font-size: 0.85rem;
             margin-bottom: 25px;
             display: block;
+            letter-spacing: 0.5px;
         }
+
         .status-box {
             font-size: 0.9rem;
             color: #e4e4e7;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 12px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
             align-items: center;
             justify-content: center;
         }
+
         .activity-text {
             font-size: 0.8rem;
             color: #a1a1aa;
+            font-style: italic;
         }
     </style>
 </head>
@@ -103,6 +144,7 @@
         </div>
         
         <h1 id="username">Загрузка...</h1>
+        <div class="status-caption">I am vibecoder</div>
         <span id="discord-tag" class="tag">@discord</span>
 
         <div class="status-box">
@@ -114,6 +156,15 @@
     <script>
         const DISCORD_ID = "1447973979171323946"; 
 
+        // --- АНИМАЦИЯ НАЗВАНИЯ ВКЛАДКИ БРАУЗЕРА ---
+        const titles = [">-<", "•_•", "~_~", "^_-", "x_x", "о_о"];
+        let titleIndex = 0;
+        setInterval(() => {
+            document.title = titles[titleIndex];
+            titleIndex = (titleIndex + 1) % titles.length;
+        }, 2000); // Смена смайлика каждые 2 секунды
+
+        // --- ПОЛУЧЕНИЕ СТАТУСА ИЗ DISCORD ---
         async function fetchDiscordStatus() {
             try {
                 const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
@@ -122,39 +173,31 @@
                 if (data.success) {
                     const user = data.data;
                     
-                    // Ник и юзернейм
                     document.getElementById('username').innerText = user.discord_user.global_name || user.discord_user.username;
                     document.getElementById('discord-tag').innerText = `@${user.discord_user.username}`;
                     
-                    // Аватарка (проверка на GIF или PNG)
                     if (user.discord_user.avatar) {
                         const isGif = user.discord_user.avatar.startsWith('a_');
                         const ext = isGif ? 'gif' : 'png';
                         document.getElementById('discord-avatar').src = `https://cdn.discordapp.com/avatars/${DISCORD_ID}/${user.discord_user.avatar}.${ext}?size=256`;
                     }
                     
-                    // Статус (кружок)
                     const dot = document.getElementById('status-dot');
                     dot.className = 'status-dot'; 
                     dot.classList.add(`status-${user.discord_status}`);
                     
-                    // Текст статуса
                     const statusText = document.getElementById('status-text');
                     if (user.discord_status === 'online') statusText.innerText = 'В сети';
                     else if (user.discord_status === 'idle') statusText.innerText = 'Не активен';
                     else if (user.discord_status === 'dnd') statusText.innerText = 'Не беспокоить';
                     else statusText.innerText = 'Офлайн';
                     
-                    // Кастомный статус или игра
                     const activityText = document.getElementById('activity-text');
-                    activityText.innerText = ""; // Очищаем
+                    activityText.innerText = ""; 
                     
                     if (user.activities && user.activities.length > 0) {
-                        // Ищем кастомный статус (текст под ником)
                         const customStatus = user.activities.find(a => a.type === 4);
-                        // Ищем игру или активность (кроме Spotify и кастомного)
                         const gameStatus = user.activities.find(a => a.type === 0);
-                        // Проверяем Spotify
                         const spotify = user.listening_to_spotify ? user.spotify : null;
 
                         if (customStatus && customStatus.state) {
@@ -162,17 +205,17 @@
                         } else if (gameStatus) {
                             activityText.innerText = `Играет в ${gameStatus.name}`;
                         } else if (spotify) {
-                            activityText.innerText = `Слушает ${spotify.song} — ${spotify.artist}`;
+                            activityText.innerText = `Слушает ${spotify.song}`;
                         }
                     }
                 }
             } catch (error) {
-                console.error("Ошибка:", error);
+                console.error("Ошибка API:", error);
             }
         }
 
         fetchDiscordStatus();
-        setInterval(fetchDiscordStatus, 5000); // Обновление каждые 5 секунд
+        setInterval(fetchDiscordStatus, 5000); // Обновление статуса каждые 5 секунд
     </script>
 </body>
 </html>
