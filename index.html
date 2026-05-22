@@ -19,7 +19,6 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            cursor: pointer; /* Показываем, что на сайт можно кликнуть */
         }
 
         /* Задний фон: Видео с облаками */
@@ -34,7 +33,7 @@
             pointer-events: none;
         }
 
-        /* Темная маска поверх видео */
+        /* Темная маска поверх видео для суровой атмосферы */
         .video-overlay {
             position: absolute;
             top: 0;
@@ -45,7 +44,7 @@
             z-index: -1;
         }
 
-        /* Карточка */
+        /* Суровая эстетичная карточка */
         .bio-card {
             position: relative;
             background: rgba(10, 10, 12, 0.45);
@@ -108,6 +107,7 @@
             color: #f4f4f5;
         }
 
+        /* Строгий монохромный стиль для текста */
         .status-caption {
             display: inline-block;
             font-size: 0.95rem;
@@ -145,22 +145,9 @@
             font-size: 0.75rem;
             color: #71717a;
         }
-
-        /* Подсказка для звука */
-        .audio-hint {
-            position: absolute;
-            bottom: 15px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.2);
-            letter-spacing: 0.5px;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
     </style>
 </head>
 <body>
-
-    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav" preload="auto"></audio>
 
     <video class="video-background" autoplay loop muted playsinline>
         <source src="https://assets.mixkit.co/videos/preview/mixkit-dark-clouds-in-the-night-sky-40348-large.mp4" type="video/mp4">
@@ -183,29 +170,8 @@
         </div>
     </div>
 
-    <div id="audio-hint" class="audio-hint">Кликни в любом месте для включения аудио-атмосферы</div>
-
     <script>
         const DISCORD_ID = "1447973979171323946"; 
-        let lastStatus = null;
-        let lastActivity = null;
-        let audioAllowed = false;
-
-        // Разрешаем звук после первого клика пользователя по сайту
-        document.body.addEventListener('click', () => {
-            audioAllowed = true;
-            const hint = document.getElementById('audio-hint');
-            if (hint) hint.style.opacity = '0'; // Прячем подсказку
-        });
-
-        // Функция воспроизведения звука
-        function playNotification() {
-            if (audioAllowed) {
-                const sound = document.getElementById('notification-sound');
-                sound.currentTime = 0; // Сброс на начало
-                sound.play().catch(e => console.log("Браузер заблокировал звук:", e));
-            }
-        }
 
         // Анимация вкладки
         const titles = [">-<", "•_•", "~_~", "^_-", "x_x", "о_о"];
@@ -238,16 +204,13 @@
                     dot.classList.add(`status-${user.discord_status}`);
                     
                     const statusText = document.getElementById('status-text');
-                    let currentStatusString = '';
-                    if (user.discord_status === 'online') currentStatusString = 'В сети';
-                    else if (user.discord_status === 'idle') currentStatusString = 'Не активен';
-                    else if (user.discord_status === 'dnd') currentStatusString = 'Не беспокоить';
-                    else currentStatusString = 'Офлайн';
-                    
-                    statusText.innerText = currentStatusString;
+                    if (user.discord_status === 'online') statusText.innerText = 'В сети';
+                    else if (user.discord_status === 'idle') statusText.innerText = 'Не активен';
+                    else if (user.discord_status === 'dnd') statusText.innerText = 'Не беспокоить';
+                    else statusText.innerText = 'Офлайн';
                     
                     const activityText = document.getElementById('activity-text');
-                    let currentActivityString = ""; 
+                    activityText.innerText = ""; 
                     
                     if (user.activities && user.activities.length > 0) {
                         const customStatus = user.activities.find(a => a.type === 4);
@@ -255,24 +218,13 @@
                         const spotify = user.listening_to_spotify ? user.spotify : null;
 
                         if (customStatus && customStatus.state) {
-                            currentActivityString = customStatus.state;
+                            activityText.innerText = customStatus.state;
                         } else if (gameStatus) {
-                            currentActivityString = `В игре: ${gameStatus.name}`;
+                            activityText.innerText = `В игре: ${gameStatus.name}`;
                         } else if (spotify) {
-                            currentActivityString = `Слушает: ${spotify.song}`;
+                            activityText.innerText = `Слушает: ${spotify.song}`;
                         }
                     }
-                    
-                    activityText.innerText = currentActivityString;
-
-                    // ПРОВЕРКА НА ИЗМЕНЕНИЯ (если статус или активность изменились — играет звук)
-                    if (lastStatus !== null && (lastStatus !== user.discord_status || lastActivity !== currentActivityString)) {
-                        playNotification();
-                    }
-
-                    // Сохраняем текущее состояние для следующей проверки
-                    lastStatus = user.discord_status;
-                    lastActivity = currentActivityString;
                 }
             } catch (error) {
                 console.error("Ошибка API:", error);
