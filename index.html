@@ -22,14 +22,13 @@
             position: relative;
         }
 
-        /* Твой собственный фон из репозитория */
+        /* Твой фон из репозитория */
         .background-image {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Декодируем пробелы и скобки для корректного чтения файла */
             background-image: url('%D0%91%D0%B5%D0%B7%20%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F%20(6).jpg');
             background-size: cover;
             background-position: center;
@@ -37,40 +36,40 @@
             transition: transform 0.5s ease;
         }
 
-        /* Затемняющий оверлей для суровой атмосферы */
+        /* Мягкое темное наложение с теплым оттенком */
         .background-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.85) 100%);
+            background: linear-gradient(180deg, rgba(15, 10, 5, 0.5) 0%, rgba(5, 3, 0, 0.85) 100%);
             z-index: -1;
         }
 
-        /* Карточка */
+        /* Карточка в цвет закатного фона */
         .bio-card {
             position: relative;
-            background: rgba(10, 10, 12, 0.65);
+            background: rgba(18, 14, 10, 0.65);
             padding: 40px 30px;
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(220, 150, 80, 0.15); /* Теплая полупрозрачная рамка */
             text-align: center;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), 0 0 40px rgba(220, 150, 80, 0.03);
             width: 310px;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
-        /* Эффект при наведении на карточку — фон сзади чуть-чуть приближается */
         body:hover .background-image {
-            transform: scale(1.03);
+            transform: scale(1.02);
         }
 
         .bio-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(255, 255, 255, 0.08);
-            background: rgba(10, 10, 12, 0.75);
+            border-color: rgba(220, 150, 80, 0.3);
+            background: rgba(22, 16, 12, 0.75);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95), 0 0 30px rgba(220, 150, 80, 0.08);
         }
 
         .avatar-container {
@@ -85,8 +84,8 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            background: #111113;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: #110e0c;
+            border: 2px solid rgba(220, 150, 80, 0.25); /* Золотистый ободок для аватарки */
         }
 
         /* Индикатор статуса */
@@ -97,12 +96,11 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            border: 4px solid #0b0b0d;
+            border: 4px solid #120e0a;
             background-color: #747f8d;
             transition: background-color 0.3s ease;
         }
 
-        /* Цвета статусов */
         .status-online { background-color: #23a55a; }
         .status-idle { background-color: #f0b232; }
         .status-dnd { background-color: #f23f43; }
@@ -113,21 +111,23 @@
             margin: 0 0 4px 0;
             font-weight: 700;
             letter-spacing: -0.5px;
-            color: #f4f4f5;
+            color: #fffbf7;
         }
 
+        /* Теплый золотистый цвет для надписи */
         .status-caption {
             display: inline-block;
             font-size: 0.95rem;
-            font-weight: 500;
-            color: #a1a1aa;
+            font-weight: 600;
+            color: #dd9c5a; 
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 6px;
+            text-shadow: 0 0 10px rgba(221, 156, 90, 0.2);
         }
 
         .tag {
-            color: rgba(255, 255, 255, 0.25);
+            color: rgba(220, 180, 150, 0.35);
             font-weight: 400;
             font-size: 0.8rem;
             margin-bottom: 25px;
@@ -137,11 +137,11 @@
 
         .status-box {
             font-size: 0.85rem;
-            color: #d4d4d8;
-            background: rgba(0, 0, 0, 0.4);
+            color: #f3e8de;
+            background: rgba(10, 7, 5, 0.5);
             padding: 12px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(220, 150, 80, 0.06);
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -151,7 +151,7 @@
 
         .activity-text {
             font-size: 0.75rem;
-            color: #71717a;
+            color: #a89485;
         }
     </style>
 </head>
@@ -179,7 +179,6 @@
     <script>
         const DISCORD_ID = "1447973979171323946"; 
 
-        // Анимация названия вкладки
         const titles = [">-<", "•_•", "~_~", "^_-", "x_x", "о_о"];
         let titleIndex = 0;
         setInterval(() => {
@@ -187,7 +186,6 @@
             titleIndex = (titleIndex + 1) % titles.length;
         }, 2000);
 
-        // Получение данных Discord
         async function fetchDiscordStatus() {
             try {
                 const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
