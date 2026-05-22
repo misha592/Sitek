@@ -5,58 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>>-<</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #070709;
+            background: #000000;
             color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
-        }
-        
-        /* Задний фон с легким неоновым свечением */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: rgba(88, 101, 242, 0.15);
-            filter: blur(120px);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 0;
+            cursor: pointer; /* Показываем, что на сайт можно кликнуть */
         }
 
+        /* Задний фон: Видео с облаками */
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Темная маска поверх видео */
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: -1;
+        }
+
+        /* Карточка */
         .bio-card {
             position: relative;
-            z-index: 1;
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(10, 10, 12, 0.45);
             padding: 40px 30px;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
             text-align: center;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
-            width: 300px;
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+            width: 310px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
         .bio-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(88, 101, 242, 0.2);
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(10, 10, 12, 0.6);
         }
 
         .avatar-container {
             position: relative;
-            width: 110px;
-            height: 110px;
-            margin: 0 auto 20px;
+            width: 105px;
+            height: 105px;
+            margin: 0 auto 25px;
         }
 
         .avatar {
@@ -64,78 +77,95 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            background: #1e1f22;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: #111113;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         /* Индикатор статуса */
         .status-dot {
             position: absolute;
-            bottom: 4px;
-            right: 4px;
-            width: 22px;
-            height: 22px;
+            bottom: 3px;
+            right: 3px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            border: 4px solid #070709;
+            border: 4px solid #0d0d11;
             background-color: #747f8d;
             transition: background-color 0.3s ease;
         }
 
-        /* Цвета статусов Дискорда */
+        /* Цвета статусов */
         .status-online { background-color: #23a55a; }
         .status-idle { background-color: #f0b232; }
         .status-dnd { background-color: #f23f43; }
         .status-offline { background-color: #747f8d; }
 
         h1 {
-            font-size: 1.7rem;
-            margin: 10px 0 5px;
+            font-size: 1.6rem;
+            margin: 0 0 4px 0;
             font-weight: 700;
             letter-spacing: -0.5px;
+            color: #f4f4f5;
         }
 
-        /* Стильная неоновая надпись I am vibecoder */
         .status-caption {
             display: inline-block;
-            font-size: 1.05rem;
-            font-weight: 600;
-            background: linear-gradient(45deg, #8a2be2, #5865F2, #00c6ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #a1a1aa;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
         }
 
         .tag {
-            color: rgba(255, 255, 255, 0.4);
-            font-weight: 500;
-            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.25);
+            font-weight: 400;
+            font-size: 0.8rem;
             margin-bottom: 25px;
             display: block;
             letter-spacing: 0.5px;
         }
 
         .status-box {
-            font-size: 0.9rem;
-            color: #e4e4e7;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 14px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            color: #d4d4d8;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
             align-items: center;
             justify-content: center;
         }
 
         .activity-text {
-            font-size: 0.8rem;
-            color: #a1a1aa;
-            font-style: italic;
+            font-size: 0.75rem;
+            color: #71717a;
+        }
+
+        /* Подсказка для звука */
+        .audio-hint {
+            position: absolute;
+            bottom: 15px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
         }
     </style>
 </head>
 <body>
+
+    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-600.wav" preload="auto"></audio>
+
+    <video class="video-background" autoplay loop muted playsinline>
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-dark-clouds-in-the-night-sky-40348-large.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
 
     <div class="bio-card">
         <div class="avatar-container">
@@ -153,18 +183,39 @@
         </div>
     </div>
 
+    <div id="audio-hint" class="audio-hint">Кликни в любом месте для включения аудио-атмосферы</div>
+
     <script>
         const DISCORD_ID = "1447973979171323946"; 
+        let lastStatus = null;
+        let lastActivity = null;
+        let audioAllowed = false;
 
-        // --- АНИМАЦИЯ НАЗВАНИЯ ВКЛАДКИ БРАУЗЕРА ---
+        // Разрешаем звук после первого клика пользователя по сайту
+        document.body.addEventListener('click', () => {
+            audioAllowed = true;
+            const hint = document.getElementById('audio-hint');
+            if (hint) hint.style.opacity = '0'; // Прячем подсказку
+        });
+
+        // Функция воспроизведения звука
+        function playNotification() {
+            if (audioAllowed) {
+                const sound = document.getElementById('notification-sound');
+                sound.currentTime = 0; // Сброс на начало
+                sound.play().catch(e => console.log("Браузер заблокировал звук:", e));
+            }
+        }
+
+        // Анимация вкладки
         const titles = [">-<", "•_•", "~_~", "^_-", "x_x", "о_о"];
         let titleIndex = 0;
         setInterval(() => {
             document.title = titles[titleIndex];
             titleIndex = (titleIndex + 1) % titles.length;
-        }, 2000); // Смена смайлика каждые 2 секунды
+        }, 2000);
 
-        // --- ПОЛУЧЕНИЕ СТАТУСА ИЗ DISCORD ---
+        // Получение данных Discord
         async function fetchDiscordStatus() {
             try {
                 const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
@@ -187,13 +238,16 @@
                     dot.classList.add(`status-${user.discord_status}`);
                     
                     const statusText = document.getElementById('status-text');
-                    if (user.discord_status === 'online') statusText.innerText = 'В сети';
-                    else if (user.discord_status === 'idle') statusText.innerText = 'Не активен';
-                    else if (user.discord_status === 'dnd') statusText.innerText = 'Не беспокоить';
-                    else statusText.innerText = 'Офлайн';
+                    let currentStatusString = '';
+                    if (user.discord_status === 'online') currentStatusString = 'В сети';
+                    else if (user.discord_status === 'idle') currentStatusString = 'Не активен';
+                    else if (user.discord_status === 'dnd') currentStatusString = 'Не беспокоить';
+                    else currentStatusString = 'Офлайн';
+                    
+                    statusText.innerText = currentStatusString;
                     
                     const activityText = document.getElementById('activity-text');
-                    activityText.innerText = ""; 
+                    let currentActivityString = ""; 
                     
                     if (user.activities && user.activities.length > 0) {
                         const customStatus = user.activities.find(a => a.type === 4);
@@ -201,13 +255,24 @@
                         const spotify = user.listening_to_spotify ? user.spotify : null;
 
                         if (customStatus && customStatus.state) {
-                            activityText.innerText = customStatus.state;
+                            currentActivityString = customStatus.state;
                         } else if (gameStatus) {
-                            activityText.innerText = `Играет в ${gameStatus.name}`;
+                            currentActivityString = `В игре: ${gameStatus.name}`;
                         } else if (spotify) {
-                            activityText.innerText = `Слушает ${spotify.song}`;
+                            currentActivityString = `Слушает: ${spotify.song}`;
                         }
                     }
+                    
+                    activityText.innerText = currentActivityString;
+
+                    // ПРОВЕРКА НА ИЗМЕНЕНИЯ (если статус или активность изменились — играет звук)
+                    if (lastStatus !== null && (lastStatus !== user.discord_status || lastActivity !== currentActivityString)) {
+                        playNotification();
+                    }
+
+                    // Сохраняем текущее состояние для следующей проверки
+                    lastStatus = user.discord_status;
+                    lastActivity = currentActivityString;
                 }
             } catch (error) {
                 console.error("Ошибка API:", error);
@@ -215,7 +280,7 @@
         }
 
         fetchDiscordStatus();
-        setInterval(fetchDiscordStatus, 5000); // Обновление статуса каждые 5 секунд
+        setInterval(fetchDiscordStatus, 5000);
     </script>
 </body>
 </html>
