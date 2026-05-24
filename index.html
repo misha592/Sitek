@@ -278,8 +278,8 @@
         <div class="separator"></div>
 
         <div class="msg-form">
-            <textarea id="msg-input" class="msg-input" rows="2" placeholder="Напиши мне что-нибудь анонимно..."></textarea>
-            <button id="msg-btn" class="msg-send-btn">Отправить анонимку</button>
+            <textarea id="msg-input" class="msg-input" rows="2" placeholder="Напиши мне что-нибудь..."></textarea>
+            <button id="msg-btn" class="msg-send-btn">Отправить сообщение</button>
             <div id="msg-status" class="msg-status"></div>
         </div>
     </div>
@@ -288,31 +288,33 @@
         const DISCORD_ID = "1447973979171323946"; 
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1507493020017103031/h5vcdsPG6Zz5fdHJGwQpiqLPknlCDf1uBc_qW1MrOsrNbvOmxIT_cAuWDZ-pdfS231EP"; 
 
+        // Настройки тем с учетом текущих имен файлов на GitHub
         const themes = [
             {
                 className: "theme-sunset",
-                bgImage: "sunset.jpg",
+                bgImage: "Без названия (6).jpg",
                 captionText: "I am vibecoder"
             },
             {
                 className: "theme-ghoul",
-                bgImage: "juuzou.jpg",
+                bgImage: "☆ Suzuya Juuzou ☆_Tokyo Ghoul.jpg",
                 captionText: "ВСЯ ЭТА КРОВЬ МНЕ (знаю что Briar)"
             }
         ];
 
-        // Выбираем тему сразу
+        // Случайный выбор темы
         const currentTheme = themes[Math.floor(Math.random() * themes.length)];
 
-        // Выполняем код, только когда DOM полностью готов
+        // Выполняем код после загрузки структуры страницы
         document.addEventListener("DOMContentLoaded", () => {
-            // Теперь body гарантированно существует в памяти!
             document.body.classList.add(currentTheme.className);
             
-            document.getElementById('bg').style.backgroundImage = `url('${currentTheme.bgImage}')`;
+            // Безопасно кодируем спецсимволы и кириллицу в названиях файлов для CSS
+            const encodedBg = currentTheme.bgImage.split('/').map(segment => encodeURIComponent(segment)).join('/');
+            document.getElementById('bg').style.backgroundImage = `url('${encodedBg}')`;
             document.getElementById('caption').innerText = currentTheme.captionText;
 
-            // Настройка вебхука
+            // Настройка отправки сообщений
             const submitBtn = document.getElementById('msg-btn');
             const inputField = document.getElementById('msg-input');
 
@@ -336,7 +338,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             embeds: [{
-                                title: "📩 Новое анонимное сообщение с сайта!",
+                                title: "📩 Новое личное сообщение с сайта!",
                                 description: `**Текст:** ${text}`,
                                 color: currentTheme.className === "theme-ghoul" ? 15672356 : 14456376, 
                                 timestamp: new Date()
@@ -358,16 +360,16 @@
                     statusEl.style.display = "block";
                 } finally {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = "Отправить анонимку";
+                    submitBtn.innerText = "Отправить сообщение";
                 }
             });
 
-            // Запускаем получение статуса из Discord
+            // Запуск Discord API
             fetchDiscordStatus();
             setInterval(fetchDiscordStatus, 5000);
         });
 
-        // Анимация тайтла вкладки (работает независимо)
+        // Анимация тайтла вкладки
         const titles = [">-<", "•_•", "~_~", "^_-", "x_x", "о_о"];
         let titleIndex = 0;
         setInterval(() => {
@@ -375,7 +377,7 @@
             titleIndex = (titleIndex + 1) % titles.length;
         }, 2000);
 
-        // Получение данных из Discord через Lanyard API
+        // Получение статуса Дискорд
         async function fetchDiscordStatus() {
             try {
                 const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
@@ -420,7 +422,7 @@
                     }
                 }
             } catch (error) {
-                console.error("Ошибка API статуса:", error);
+                console.error("Ошибка API:", error);
             }
         }
     </script>
