@@ -18,7 +18,8 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            max-height: 100vh;
+            overflow: hidden; /* Полностью запрещает любой скролл на странице */
             position: relative;
         }
 
@@ -56,7 +57,6 @@
             -webkit-backdrop-filter: blur(14px);
             width: 320px;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            margin: 20px 0;
             border: 1px solid transparent;
         }
         
@@ -178,10 +178,12 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            width: 100%;
         }
 
         .msg-input {
             width: 100%;
+            box-sizing: border-box; /* Чтобы отступы не распирали карточку */
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
@@ -200,6 +202,7 @@
 
         .msg-send-btn {
             width: 100%;
+            box-sizing: border-box;
             padding: 10px;
             border-radius: 8px;
             border: none;
@@ -288,7 +291,7 @@
         const DISCORD_ID = "1447973979171323946"; 
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1507493020017103031/h5vcdsPG6Zz5fdHJGwQpiqLPknlCDf1uBc_qW1MrOsrNbvOmxIT_cAuWDZ-pdfS231EP"; 
 
-        // Настройки тем с учетом текущих имен файлов на GitHub
+        // Темы оформления
         const themes = [
             {
                 className: "theme-sunset",
@@ -305,16 +308,16 @@
         // Случайный выбор темы
         const currentTheme = themes[Math.floor(Math.random() * themes.length)];
 
-        // Выполняем код после загрузки структуры страницы
+        // Выполняем код только после загрузки дерева тегов
         document.addEventListener("DOMContentLoaded", () => {
             document.body.classList.add(currentTheme.className);
             
-            // Безопасно кодируем спецсимволы и кириллицу в названиях файлов для CSS
+            // Безопасное кодирование кириллицы и спецсимволов в названиях файлов
             const encodedBg = currentTheme.bgImage.split('/').map(segment => encodeURIComponent(segment)).join('/');
             document.getElementById('bg').style.backgroundImage = `url('${encodedBg}')`;
             document.getElementById('caption').innerText = currentTheme.captionText;
 
-            // Настройка отправки сообщений
+            // Настройка логики отправки сообщений
             const submitBtn = document.getElementById('msg-btn');
             const inputField = document.getElementById('msg-input');
 
@@ -364,12 +367,12 @@
                 }
             });
 
-            // Запуск Discord API
+            // Запуск обновлений Дискорд статуса
             fetchDiscordStatus();
             setInterval(fetchDiscordStatus, 5000);
         });
 
-        // Анимация тайтла вкладки
+        // Анимация названия вкладки
         const titles = [">-<", "•_•", "~_~", "^_-", "x_x", "о_о"];
         let titleIndex = 0;
         setInterval(() => {
@@ -377,7 +380,7 @@
             titleIndex = (titleIndex + 1) % titles.length;
         }, 2000);
 
-        // Получение статуса Дискорд
+        // Получение данных профиля и активности через Lanyard API
         async function fetchDiscordStatus() {
             try {
                 const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
@@ -422,7 +425,7 @@
                     }
                 }
             } catch (error) {
-                console.error("Ошибка API:", error);
+                console.error("Ошибка API статуса:", error);
             }
         }
     </script>
