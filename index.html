@@ -308,27 +308,63 @@
         // Случайный выбор темы
         const currentTheme = themes[Math.floor(Math.random() * themes.length)];
 
+        // Лимит описания эмбеда в Discord
+        const MAX_MESSAGE_LENGTH = 4000;
+        // Сколько подряд идущих ошибок API статуса допустимо до остановки опроса
+        const MAX_STATUS_FAILURES = 5;
+
+        let statusTimer = null;
+        let statusFailures = 0;
+
+        // Отсутствие элемента - это ошибка разметки, а не повод молча продолжать
+        function byId(id) {
+            const el = document.getElementById(id);
+            if (!el) throw new Error(`Элемент #${id} не найден в разметке`);
+            return el;
+        }
+
+        function showMsgStatus(statusEl, text, color) {
+            statusEl.innerText = text;
+            statusEl.style.color = color;
+            statusEl.style.display = "block";
+        }
+
         // Выполняем код только после загрузки дерева тегов
         document.addEventListener("DOMContentLoaded", () => {
             document.body.classList.add(currentTheme.className);
             
             // Безопасное кодирование кириллицы и спецсимволов в названиях файлов
             const encodedBg = currentTheme.bgImage.split('/').map(segment => encodeURIComponent(segment)).join('/');
-            document.getElementById('bg').style.backgroundImage = `url('${encodedBg}')`;
-            document.getElementById('caption').innerText = currentTheme.captionText;
+            byId('bg').style.backgroundImage = `url('${encodedBg}')`;
+            byId('caption').innerText = currentTheme.captionText;
+
+            // Фон и аватар грузятся браузером, ошибки загрузки нужно замечать
+            const bgProbe = new Image();
+            bgProbe.addEventListener('error', () => {
+                console.error(`Не удалось загрузить фон: ${currentTheme.bgImage}`);
+            });
+            bgProbe.src = encodedBg;
+
+            const avatarEl = byId('discord-avatar');
+            avatarEl.addEventListener('error', () => {
+                console.error(`Не удалось загрузить аватар: ${avatarEl.src}`);
+            });
 
             // Настройка логики отправки сообщений
-            const submitBtn = document.getElementById('msg-btn');
-            const inputField = document.getElementById('msg-input');
+            const submitBtn = byId('msg-btn');
+            const inputField = byId('msg-input');
 
             submitBtn.addEventListener('click', async () => {
                 const text = inputField.value.trim();
-                const statusEl = document.getElementById('msg-status');
+                const statusEl = byId('msg-status');
                 
                 if(!text) {
-                    statusEl.innerText = "Сначала напиши что-нибудь!";
-                    statusEl.style.color = "#ff4444";
-                    statusEl.style.display = "block";
+                    showMsgStatus(statusEl, "Сначала напиши что-нибудь!", "#ff4444");
+                    return;
+                }
+
+                if(text.length > MAX_MESSAGE_LENGTH) {
+                    showMsgStatus(statusEl, `Слишком длинное сообщение: ${text.length} из ${MAX_MESSAGE_LENGTH} символов.`, "#ff4444");
                     return;
                 }
 
@@ -344,23 +380,27 @@
                                 title: "📩 Новое личное сообщение с сайта!",
                                 description: `**Текст:** ${text}`,
                                 color: currentTheme.className === "theme-ghoul" ? 15672356 : 14456376, 
-                                timestamp: new Date()
+                                timestamp: new Date().toISOString()
                             }]
-                        })
+                        }),
+                        signal: AbortSignal.timeout(10000)
                     });
 
-                    if(response.ok) {
-                        statusEl.innerText = "Успешно отправлено!";
-                        statusEl.style.color = "#23a55a";
-                        statusEl.style.display = "block";
-                        inputField.value = ""; 
-                    } else {
-                        throw new Error();
+                    if(!response.ok) {
+                        const details = await response.text().catch(() => '');
+                        throw new Error(`Вебхук вернул ${response.status} ${response.statusText}${details ? `: ${details}` : ''}`);
                     }
-                } catch (e) {
-                    statusEl.innerText = "Ошибка при отправке.";
-                    statusEl.style.color = "#ff4444";
-                    statusEl.style.display = "block";
+
+                    showMsgStatus(statusEl, "Успешно отправлено!", "#23a55a");
+                    inputField.value = "";
+                } catch (error) {
+                    console.error("Ошибка отправки сообщения:", error);
+                    const reason = error.name === 'TimeoutError'
+                        ? "истекло время ожидания"
+                        : error.name === 'TypeError'
+                            ? "нет соединения"
+                            : error.message;
+                    showMsgStatus(statusEl, `Ошибка при отправке: ${reason}`, "#ff4444");
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Отправить сообщение";
@@ -369,7 +409,7 @@
 
             // Запуск обновлений Дискорд статуса
             fetchDiscordStatus();
-            setInterval(fetchDiscordStatus, 5000);
+            statusTimer = setInterval(fetchDiscordStatus, 5000);
         });
 
         // Анимация названия вкладки
@@ -380,52 +420,97 @@
             titleIndex = (titleIndex + 1) % titles.length;
         }, 2000);
 
+        // Отображение недоступности статуса, чтобы карточка не висела на "Загрузка..."
+        function showStatusUnavailable(message) {
+            const username = document.getElementById('username');
+            if (username && username.innerText === 'Загрузка...') username.innerText = 'Профиль недоступен';
+
+            const dot = document.getElementById('status-dot');
+            if (dot) {
+                dot.className = 'status-dot status-offline';
+            }
+
+            const statusText = document.getElementById('status-text');
+            if (statusText) statusText.innerText = message;
+        }
+
         // Получение данных профиля и активности через Lanyard API
         async function fetchDiscordStatus() {
             try {
-                const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const user = data.data;
-                    document.getElementById('username').innerText = user.discord_user.global_name || user.discord_user.username;
-                    document.getElementById('discord-tag').innerText = `@${user.discord_user.username}`;
-                    
-                    if (user.discord_user.avatar) {
-                        const isGif = user.discord_user.avatar.startsWith('a_');
-                        const ext = isGif ? 'gif' : 'png';
-                        document.getElementById('discord-avatar').src = `https://cdn.discordapp.com/avatars/${DISCORD_ID}/${user.discord_user.avatar}.${ext}?size=256`;
-                    }
-                    
-                    const dot = document.getElementById('status-dot');
-                    dot.className = 'status-dot'; 
-                    dot.classList.add(`status-${user.discord_status}`);
-                    
-                    const statusText = document.getElementById('status-text');
-                    if (user.discord_status === 'online') statusText.innerText = 'В сети';
-                    else if (user.discord_status === 'idle') statusText.innerText = 'Не активен';
-                    else if (user.discord_status === 'dnd') statusText.innerText = 'Не беспокоить';
-                    else statusText.innerText = 'Офлайн';
-                    
-                    const activityText = document.getElementById('activity-text');
-                    activityText.innerText = ""; 
-                    
-                    if (user.activities && user.activities.length > 0) {
-                        const customStatus = user.activities.find(a => a.type === 4);
-                        const gameStatus = user.activities.find(a => a.type === 0);
-                        const spotify = user.listening_to_spotify ? user.spotify : null;
+                const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`, {
+                    signal: AbortSignal.timeout(10000)
+                });
 
-                        if (customStatus && customStatus.state) {
-                            activityText.innerText = customStatus.state;
-                        } else if (gameStatus) {
-                            activityText.innerText = `В игре: ${gameStatus.name}`;
-                        } else if (spotify) {
-                            activityText.innerText = `Слушает: ${spotify.song}`;
-                        }
+                if (!response.ok) {
+                    throw new Error(`Lanyard API вернул ${response.status} ${response.statusText}`);
+                }
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    throw new Error(`Некорректный ответ Lanyard API: ${parseError.message}`);
+                }
+
+                if (!data.success) {
+                    throw new Error(`Lanyard API отклонил запрос: ${data.error?.message || 'неизвестная причина'}`);
+                }
+
+                const user = data.data;
+                if (!user || !user.discord_user) {
+                    throw new Error("Lanyard API не вернул данные профиля");
+                }
+
+                byId('username').innerText = user.discord_user.global_name || user.discord_user.username;
+                byId('discord-tag').innerText = `@${user.discord_user.username}`;
+
+                if (user.discord_user.avatar) {
+                    const isGif = user.discord_user.avatar.startsWith('a_');
+                    const ext = isGif ? 'gif' : 'png';
+                    byId('discord-avatar').src = `https://cdn.discordapp.com/avatars/${DISCORD_ID}/${user.discord_user.avatar}.${ext}?size=256`;
+                }
+
+                const dot = byId('status-dot');
+                dot.className = 'status-dot'; 
+                dot.classList.add(`status-${user.discord_status}`);
+
+                const statusText = byId('status-text');
+                if (user.discord_status === 'online') statusText.innerText = 'В сети';
+                else if (user.discord_status === 'idle') statusText.innerText = 'Не активен';
+                else if (user.discord_status === 'dnd') statusText.innerText = 'Не беспокоить';
+                else statusText.innerText = 'Офлайн';
+
+                const activityText = byId('activity-text');
+                activityText.innerText = ""; 
+
+                if (user.activities && user.activities.length > 0) {
+                    const customStatus = user.activities.find(a => a.type === 4);
+                    const gameStatus = user.activities.find(a => a.type === 0);
+                    const spotify = user.listening_to_spotify ? user.spotify : null;
+
+                    if (customStatus && customStatus.state) {
+                        activityText.innerText = customStatus.state;
+                    } else if (gameStatus) {
+                        activityText.innerText = `В игре: ${gameStatus.name}`;
+                    } else if (spotify) {
+                        activityText.innerText = `Слушает: ${spotify.song}`;
                     }
                 }
+
+                statusFailures = 0;
             } catch (error) {
-                console.error("Ошибка API статуса:", error);
+                statusFailures += 1;
+                console.error(`Ошибка API статуса (попытка ${statusFailures}):`, error);
+
+                if (statusFailures >= MAX_STATUS_FAILURES) {
+                    if (statusTimer !== null) {
+                        clearInterval(statusTimer);
+                        statusTimer = null;
+                    }
+                    showStatusUnavailable('Статус недоступен, обновите страницу');
+                } else {
+                    showStatusUnavailable('Не удалось получить статус, повтор...');
+                }
             }
         }
     </script>
