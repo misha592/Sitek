@@ -274,14 +274,14 @@
             <span id="activity-text" class="activity-text"></span>
         </div>
 
-        <a id="discord-link" href="https://discord.gg/qgs4ASzPtP" target="_blank" class="discord-btn">
+        <a id="discord-link" href="https://discord.gg/qgs4ASzPtP" target="_blank" rel="noopener noreferrer" class="discord-btn">
             Зайти в Discord
         </a>
 
         <div class="separator"></div>
 
         <div class="msg-form">
-            <textarea id="msg-input" class="msg-input" rows="2" placeholder="Напиши мне что-нибудь..."></textarea>
+            <textarea id="msg-input" class="msg-input" rows="2" maxlength="500" placeholder="Напиши мне что-нибудь..."></textarea>
             <button id="msg-btn" class="msg-send-btn">Отправить сообщение</button>
             <div id="msg-status" class="msg-status"></div>
         </div>
@@ -289,7 +289,12 @@
 
     <script>
         const DISCORD_ID = "1447973979171323946"; 
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1507493020017103031/h5vcdsPG6Zz5fdHJGwQpiqLPknlCDf1uBc_qW1MrOsrNbvOmxIT_cAuWDZ-pdfS231EP"; 
+
+        // Публичный адрес релея, который сам хранит Discord-вебхук на сервере.
+        // Вебхук нельзя держать в этом файле: он виден всем и позволяет спамить в канал.
+        // Смотри relay/worker.js и README.md.
+        const MESSAGE_ENDPOINT = "";
+        const MESSAGE_MAX_LENGTH = 500;
 
         // Темы оформления
         const themes = [
@@ -320,15 +325,30 @@
             // Настройка логики отправки сообщений
             const submitBtn = document.getElementById('msg-btn');
             const inputField = document.getElementById('msg-input');
+            const statusEl = document.getElementById('msg-status');
+
+            const showStatus = (text, color) => {
+                statusEl.innerText = text;
+                statusEl.style.color = color;
+                statusEl.style.display = "block";
+            };
+
+            if (!MESSAGE_ENDPOINT) {
+                submitBtn.disabled = true;
+                inputField.disabled = true;
+                showStatus("Отправка сообщений пока не настроена.", "#f0b232");
+            }
 
             submitBtn.addEventListener('click', async () => {
                 const text = inputField.value.trim();
-                const statusEl = document.getElementById('msg-status');
-                
+
                 if(!text) {
-                    statusEl.innerText = "Сначала напиши что-нибудь!";
-                    statusEl.style.color = "#ff4444";
-                    statusEl.style.display = "block";
+                    showStatus("Сначала напиши что-нибудь!", "#ff4444");
+                    return;
+                }
+
+                if(text.length > MESSAGE_MAX_LENGTH) {
+                    showStatus(`Слишком длинно: максимум ${MESSAGE_MAX_LENGTH} символов.`, "#ff4444");
                     return;
                 }
 
@@ -336,31 +356,20 @@
                 submitBtn.innerText = "Отправка...";
 
                 try {
-                    const response = await fetch(WEBHOOK_URL, {
+                    const response = await fetch(MESSAGE_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            embeds: [{
-                                title: "📩 Новое личное сообщение с сайта!",
-                                description: `**Текст:** ${text}`,
-                                color: currentTheme.className === "theme-ghoul" ? 15672356 : 14456376, 
-                                timestamp: new Date()
-                            }]
-                        })
+                        body: JSON.stringify({ message: text, theme: currentTheme.className })
                     });
 
                     if(response.ok) {
-                        statusEl.innerText = "Успешно отправлено!";
-                        statusEl.style.color = "#23a55a";
-                        statusEl.style.display = "block";
+                        showStatus("Успешно отправлено!", "#23a55a");
                         inputField.value = ""; 
                     } else {
-                        throw new Error();
+                        throw new Error(`HTTP ${response.status}`);
                     }
                 } catch (e) {
-                    statusEl.innerText = "Ошибка при отправке.";
-                    statusEl.style.color = "#ff4444";
-                    statusEl.style.display = "block";
+                    showStatus("Ошибка при отправке.", "#ff4444");
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Отправить сообщение";
