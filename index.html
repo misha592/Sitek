@@ -45,6 +45,7 @@
             height: 100%;
             z-index: -1;
             transition: background 0.5s ease;
+            background: linear-gradient(180deg, var(--overlay-top) 0%, var(--overlay-bottom) 100%);
         }
 
         /* Основная карточка */
@@ -57,7 +58,14 @@
             -webkit-backdrop-filter: blur(14px);
             width: 320px;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid transparent;
+            background: var(--card-bg);
+            border: 1px solid rgba(var(--accent-rgb), var(--card-border-alpha));
+            box-shadow: 0 40px 100px var(--card-shadow), 0 0 40px rgba(var(--accent-rgb), 0.03);
+        }
+
+        .bio-card:hover {
+            background: var(--card-bg-hover);
+            border-color: rgba(var(--accent-rgb), var(--card-border-alpha-hover));
         }
         
         body:hover .background-image {
@@ -76,7 +84,7 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid transparent;
+            border: 2px solid rgba(var(--accent-rgb), 0.25);
             transition: border-color 0.5s ease;
         }
 
@@ -88,7 +96,7 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            border: 4px solid transparent;
+            border: 4px solid var(--dot-border);
             transition: background-color 0.3s ease, border-color 0.5s ease;
         }
 
@@ -114,6 +122,8 @@
             text-transform: uppercase;
             margin-bottom: 6px;
             transition: color 0.5s ease, text-shadow 0.5s ease;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--caption-glow);
         }
 
         .tag {
@@ -123,6 +133,7 @@
             display: block;
             letter-spacing: 0.5px;
             transition: color 0.5s ease;
+            color: var(--tag-color);
         }
 
         .status-box {
@@ -135,13 +146,16 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-            border: 1px solid transparent;
+            background: var(--box-bg);
+            border: 1px solid rgba(var(--accent-rgb), var(--box-border-alpha));
+            color: var(--box-color);
             transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
         }
 
         .activity-text {
             font-size: 0.75rem;
             transition: color 0.5s ease;
+            color: var(--activity-color);
         }
 
         /* Кнопка ссылки на Дискорд */
@@ -157,12 +171,17 @@
             text-decoration: none;
             letter-spacing: 0.5px;
             margin-bottom: 20px;
-            border: 1px solid transparent;
+            background: rgba(var(--accent-rgb), var(--btn-bg-alpha));
+            border: 1px solid rgba(var(--accent-rgb), 0.25);
+            color: var(--accent);
+            box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.1);
             transition: all 0.3s ease;
         }
 
         .discord-btn:hover {
             transform: scale(1.02);
+            background: rgba(var(--accent-rgb), 0.2);
+            box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.4);
         }
 
         /* Разделитель */
@@ -198,6 +217,7 @@
 
         .msg-input:focus {
             background: rgba(0, 0, 0, 0.6);
+            border-color: rgba(var(--accent-rgb), 0.4);
         }
 
         .msg-send-btn {
@@ -208,6 +228,8 @@
             border: none;
             font-size: 0.8rem;
             font-weight: 600;
+            background: var(--accent);
+            color: var(--btn-text);
             cursor: pointer;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
@@ -223,35 +245,49 @@
             display: none;
         }
 
-        /* --- СТИЛИ ДЛЯ ТЕМЫ 1 (ЗАКАТ) --- */
-        .theme-sunset .background-overlay { background: linear-gradient(180deg, rgba(15, 10, 5, 0.5) 0%, rgba(5, 3, 0, 0.85) 100%); }
-        .theme-sunset .bio-card { background: rgba(18, 14, 10, 0.65); border: 1px solid rgba(220, 150, 80, 0.15); box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), 0 0 40px rgba(220, 150, 80, 0.03); }
-        .theme-sunset .bio-card:hover { border-color: rgba(220, 150, 80, 0.3); background: rgba(22, 16, 12, 0.75); }
-        .theme-sunset .avatar { border-color: rgba(220, 150, 80, 0.25); }
-        .theme-sunset .status-dot { border-color: #18120e; }
-        .theme-sunset .status-caption { color: #dd9c5a; text-shadow: 0 0 10px rgba(221, 156, 90, 0.2); }
-        .theme-sunset .tag { color: rgba(220, 180, 150, 0.35); }
-        .theme-sunset .status-box { background: rgba(10, 7, 5, 0.5); border-color: rgba(220, 150, 80, 0.06); color: #f3e8de; }
-        .theme-sunset .activity-text { color: #a89485; }
-        .theme-sunset .discord-btn { background: rgba(220, 150, 80, 0.1); border-color: rgba(220, 150, 80, 0.25); color: #dd9c5a; box-shadow: 0 0 15px rgba(220, 150, 80, 0.1); }
-        .theme-sunset .discord-btn:hover { background: rgba(220, 150, 80, 0.2); box-shadow: 0 0 20px rgba(220, 150, 80, 0.4); }
-        .theme-sunset .msg-input:focus { border-color: rgba(220, 150, 80, 0.4); }
-        .theme-sunset .msg-send-btn { background: #dd9c5a; color: #120e0a; }
+        /* --- ТЕМА 1 (ЗАКАТ) --- */
+        .theme-sunset {
+            --accent: #dd9c5a;
+            --accent-rgb: 220, 150, 80;
+            --caption-glow: rgba(221, 156, 90, 0.2);
+            --overlay-top: rgba(15, 10, 5, 0.5);
+            --overlay-bottom: rgba(5, 3, 0, 0.85);
+            --card-bg: rgba(18, 14, 10, 0.65);
+            --card-bg-hover: rgba(22, 16, 12, 0.75);
+            --card-shadow: rgba(0, 0, 0, 0.9);
+            --card-border-alpha: 0.15;
+            --card-border-alpha-hover: 0.3;
+            --dot-border: #18120e;
+            --tag-color: rgba(220, 180, 150, 0.35);
+            --box-bg: rgba(10, 7, 5, 0.5);
+            --box-border-alpha: 0.06;
+            --box-color: #f3e8de;
+            --activity-color: #a89485;
+            --btn-bg-alpha: 0.1;
+            --btn-text: #120e0a;
+        }
 
-        /* --- СТИЛИ ДЛЯ ТЕМЫ 2 (ГУЛЬ / БРАЙАР) --- */
-        .theme-ghoul .background-overlay { background: linear-gradient(180deg, rgba(20, 0, 0, 0.55) 0%, rgba(5, 0, 0, 0.9) 100%); }
-        .theme-ghoul .bio-card { background: rgba(12, 5, 5, 0.7); border: 1px solid rgba(239, 68, 68, 0.15); box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95), 0 0 40px rgba(239, 68, 68, 0.03); }
-        .theme-ghoul .bio-card:hover { border-color: rgba(239, 68, 68, 0.35); background: rgba(16, 6, 6, 0.8); }
-        .theme-ghoul .avatar { border-color: rgba(239, 68, 68, 0.25); }
-        .theme-ghoul .status-dot { border-color: #0c0505; }
-        .theme-ghoul .status-caption { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-        .theme-ghoul .tag { color: rgba(239, 150, 150, 0.3); }
-        .theme-ghoul .status-box { background: rgba(10, 4, 4, 0.6); border-color: rgba(239, 68, 68, 0.08); color: #fca5a5; }
-        .theme-ghoul .activity-text { color: #f87171; }
-        .theme-ghoul .discord-btn { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.25); color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
-        .theme-ghoul .discord-btn:hover { background: rgba(239, 68, 68, 0.2); box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-        .theme-ghoul .msg-input:focus { border-color: rgba(239, 68, 68, 0.4); }
-        .theme-ghoul .msg-send-btn { background: #ef4444; color: #ffffff; }
+        /* --- ТЕМА 2 (ГУЛЬ / БРАЙАР) --- */
+        .theme-ghoul {
+            --accent: #ef4444;
+            --accent-rgb: 239, 68, 68;
+            --caption-glow: rgba(239, 68, 68, 0.4);
+            --overlay-top: rgba(20, 0, 0, 0.55);
+            --overlay-bottom: rgba(5, 0, 0, 0.9);
+            --card-bg: rgba(12, 5, 5, 0.7);
+            --card-bg-hover: rgba(16, 6, 6, 0.8);
+            --card-shadow: rgba(0, 0, 0, 0.95);
+            --card-border-alpha: 0.15;
+            --card-border-alpha-hover: 0.35;
+            --dot-border: #0c0505;
+            --tag-color: rgba(239, 150, 150, 0.3);
+            --box-bg: rgba(10, 4, 4, 0.6);
+            --box-border-alpha: 0.08;
+            --box-color: #fca5a5;
+            --activity-color: #f87171;
+            --btn-bg-alpha: 0.08;
+            --btn-text: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -296,14 +332,47 @@
             {
                 className: "theme-sunset",
                 bgImage: "Без названия (6).jpg",
-                captionText: "I am vibecoder"
+                captionText: "I am vibecoder",
+                embedColor: 14456376
             },
             {
                 className: "theme-ghoul",
                 bgImage: "☆ Suzuya Juuzou ☆_Tokyo Ghoul.jpg",
-                captionText: "ВСЯ ЭТА КРОВЬ МНЕ (знаю что Briar)"
+                captionText: "ВСЯ ЭТА КРОВЬ МНЕ (знаю что Briar)",
+                embedColor: 15672356
             }
         ];
+
+        // Названия статусов Дискорда
+        const STATUS_LABELS = {
+            online: "В сети",
+            idle: "Не активен",
+            dnd: "Не беспокоить",
+            offline: "Офлайн"
+        };
+
+        const COLOR_ERROR = "#ff4444";
+        const COLOR_SUCCESS = "#23a55a";
+        const SEND_BTN_LABEL = "Отправить сообщение";
+
+        // Общие утилиты
+        const byId = (id) => document.getElementById(id);
+
+        const setText = (id, text) => { byId(id).innerText = text; };
+
+        // Показ сообщения под формой
+        function showFormStatus(text, color) {
+            const statusEl = byId('msg-status');
+            statusEl.innerText = text;
+            statusEl.style.color = color;
+            statusEl.style.display = "block";
+        }
+
+        // Состояние кнопки отправки
+        function setSendingState(btn, isSending) {
+            btn.disabled = isSending;
+            btn.innerText = isSending ? "Отправка..." : SEND_BTN_LABEL;
+        }
 
         // Случайный выбор темы
         const currentTheme = themes[Math.floor(Math.random() * themes.length)];
@@ -314,26 +383,22 @@
             
             // Безопасное кодирование кириллицы и спецсимволов в названиях файлов
             const encodedBg = currentTheme.bgImage.split('/').map(segment => encodeURIComponent(segment)).join('/');
-            document.getElementById('bg').style.backgroundImage = `url('${encodedBg}')`;
-            document.getElementById('caption').innerText = currentTheme.captionText;
+            byId('bg').style.backgroundImage = `url('${encodedBg}')`;
+            setText('caption', currentTheme.captionText);
 
             // Настройка логики отправки сообщений
-            const submitBtn = document.getElementById('msg-btn');
-            const inputField = document.getElementById('msg-input');
+            const submitBtn = byId('msg-btn');
+            const inputField = byId('msg-input');
 
             submitBtn.addEventListener('click', async () => {
                 const text = inputField.value.trim();
-                const statusEl = document.getElementById('msg-status');
-                
+
                 if(!text) {
-                    statusEl.innerText = "Сначала напиши что-нибудь!";
-                    statusEl.style.color = "#ff4444";
-                    statusEl.style.display = "block";
+                    showFormStatus("Сначала напиши что-нибудь!", COLOR_ERROR);
                     return;
                 }
 
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Отправка...";
+                setSendingState(submitBtn, true);
 
                 try {
                     const response = await fetch(WEBHOOK_URL, {
@@ -343,27 +408,20 @@
                             embeds: [{
                                 title: "📩 Новое личное сообщение с сайта!",
                                 description: `**Текст:** ${text}`,
-                                color: currentTheme.className === "theme-ghoul" ? 15672356 : 14456376, 
+                                color: currentTheme.embedColor,
                                 timestamp: new Date()
                             }]
                         })
                     });
 
-                    if(response.ok) {
-                        statusEl.innerText = "Успешно отправлено!";
-                        statusEl.style.color = "#23a55a";
-                        statusEl.style.display = "block";
-                        inputField.value = ""; 
-                    } else {
-                        throw new Error();
-                    }
+                    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    showFormStatus("Успешно отправлено!", COLOR_SUCCESS);
+                    inputField.value = "";
                 } catch (e) {
-                    statusEl.innerText = "Ошибка при отправке.";
-                    statusEl.style.color = "#ff4444";
-                    statusEl.style.display = "block";
+                    showFormStatus("Ошибка при отправке.", COLOR_ERROR);
                 } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Отправить сообщение";
+                    setSendingState(submitBtn, false);
                 }
             });
 
@@ -388,45 +446,36 @@
                 
                 if (data.success) {
                     const user = data.data;
-                    document.getElementById('username').innerText = user.discord_user.global_name || user.discord_user.username;
-                    document.getElementById('discord-tag').innerText = `@${user.discord_user.username}`;
-                    
+                    setText('username', user.discord_user.global_name || user.discord_user.username);
+                    setText('discord-tag', `@${user.discord_user.username}`);
+
                     if (user.discord_user.avatar) {
-                        const isGif = user.discord_user.avatar.startsWith('a_');
-                        const ext = isGif ? 'gif' : 'png';
-                        document.getElementById('discord-avatar').src = `https://cdn.discordapp.com/avatars/${DISCORD_ID}/${user.discord_user.avatar}.${ext}?size=256`;
+                        const ext = user.discord_user.avatar.startsWith('a_') ? 'gif' : 'png';
+                        byId('discord-avatar').src = `https://cdn.discordapp.com/avatars/${DISCORD_ID}/${user.discord_user.avatar}.${ext}?size=256`;
                     }
-                    
-                    const dot = document.getElementById('status-dot');
+
+                    const dot = byId('status-dot');
                     dot.className = 'status-dot'; 
                     dot.classList.add(`status-${user.discord_status}`);
-                    
-                    const statusText = document.getElementById('status-text');
-                    if (user.discord_status === 'online') statusText.innerText = 'В сети';
-                    else if (user.discord_status === 'idle') statusText.innerText = 'Не активен';
-                    else if (user.discord_status === 'dnd') statusText.innerText = 'Не беспокоить';
-                    else statusText.innerText = 'Офлайн';
-                    
-                    const activityText = document.getElementById('activity-text');
-                    activityText.innerText = ""; 
-                    
-                    if (user.activities && user.activities.length > 0) {
-                        const customStatus = user.activities.find(a => a.type === 4);
-                        const gameStatus = user.activities.find(a => a.type === 0);
-                        const spotify = user.listening_to_spotify ? user.spotify : null;
 
-                        if (customStatus && customStatus.state) {
-                            activityText.innerText = customStatus.state;
-                        } else if (gameStatus) {
-                            activityText.innerText = `В игре: ${gameStatus.name}`;
-                        } else if (spotify) {
-                            activityText.innerText = `Слушает: ${spotify.song}`;
-                        }
-                    }
+                    setText('status-text', STATUS_LABELS[user.discord_status] || STATUS_LABELS.offline);
+                    setText('activity-text', describeActivity(user));
                 }
             } catch (error) {
                 console.error("Ошибка API статуса:", error);
             }
+        }
+
+        // Выбор приоритетной активности пользователя
+        function describeActivity(user) {
+            const activities = user.activities || [];
+            const customStatus = activities.find(a => a.type === 4);
+            const gameStatus = activities.find(a => a.type === 0);
+
+            if (customStatus && customStatus.state) return customStatus.state;
+            if (gameStatus) return `В игре: ${gameStatus.name}`;
+            if (user.listening_to_spotify && user.spotify) return `Слушает: ${user.spotify.song}`;
+            return "";
         }
     </script>
 </body>
